@@ -28,7 +28,7 @@ Kestrel.sys = 1,,
 %ManufacturerName% = Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
 
 [Standard.NT$ARCH$.10.0...16299]
-%Kestrel.DeviceDesc% = Kestrel_Device, Root\Kestrel ; TODO: edit hw-id
+%Kestrel.DeviceDesc% = Kestrel_Device, Root\KestrelEDR ; TODO: edit hw-id
 
 [Kestrel_Device.NT]
 CopyFiles = File_Copy
@@ -56,7 +56,7 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 SPSVCINST_ASSOCSERVICE = 0x00000002
-ManufacturerName = "Kestel EDR - DEBUG" ;TODO: Replace with your manufacturer name
+ManufacturerName = "<Your manufacturer name>" ;TODO: Replace with your manufacturer name
 DiskName = "Kestrel Installation Disk"
-Kestrel.DeviceDesc = "Kestrel Device - DEBUG"
-Kestrel.SVCDESC = "Kestrel Service - DEBUG"
+Kestrel.DeviceDesc = "Kestrel Device"
+Kestrel.SVCDESC = "Kestrel Service"

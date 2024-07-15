@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8429B04E-7D44-4BD1-915C-169F01CE66E8}</ProjectGuid>
+    <ProjectGuid>{0A1A7D28-345D-4104-8E05-1B036D1781C4}</ProjectGuid>
     <TemplateGuid>{1bc93793-694f-48fe-9372-81e2b05556fd}</TemplateGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
@@ -104,18 +104,18 @@
     </DriverSign>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <FilesToPackage Include="$(TargetPath)" />
+    <Inf Include="Kestrel.inf" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="driver\win64\Driver.h" />
-    <ClInclude Include="driver\win64\stdafx.h" />
+    <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="driver\win64\Driver.cpp" />
     <ClCompile Include="driver\win64\stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="Kestrel.inf" />
+    <ClInclude Include="driver\win64\Driver.h" />
+    <ClInclude Include="driver\win64\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
