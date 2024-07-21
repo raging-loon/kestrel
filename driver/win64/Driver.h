@@ -5,11 +5,11 @@
 #include <wdf.h>
 
 #define KS_DRIVER_NAME			L"KestrelEDR"
-#define KS_NT_DEVICE_NAME		L"\\Device\\KestrelEDRDevice"
-#define KS_DOS_DEV_LINK_NAME	L"\\DosDevices\\KestrelEDRDevice"
+#define KS_NT_DEVICE_NAME		L"\\Device\\KestrelEDR"
+#define KS_DOS_DEV_LINK_NAME	L"\\DosDevices\\KestrelEDR"
 
 extern "C" DRIVER_INITIALIZE DriverEntry;
-extern "C" DRIVER_UNLOAD	 DriverUnload;
+DRIVER_UNLOAD	 DriverUnload;
 
 extern "C" void DeleteExistingDeviceEntry(PUNICODE_STRING name);
 

@@ -14,13 +14,14 @@ extern "C" NTSTATUS DriverEntry(
 
 	NTSTATUS status = STATUS_SUCCESS;
 
-	KdPrint(("[+] Loading KestralEDR\n"));
+	KdPrint(("[+] Loading KsEDR\n"));
 
 	// Initialize Device
-	UNICODE_STRING NTDeviceName = RTL_CONSTANT_STRING(KS_NT_DEVICE_NAME);
 	UNICODE_STRING DosDevLinkName = RTL_CONSTANT_STRING(KS_DOS_DEV_LINK_NAME);
+	UNICODE_STRING NTDeviceName = RTL_CONSTANT_STRING(KS_NT_DEVICE_NAME);
 
 	PDEVICE_OBJECT Device = nullptr;
+	IoDeleteSymbolicLink(&DosDevLinkName);
 
 	KeInitializeGuardedMutex(&KsGuardedMutex);
 
@@ -61,22 +62,28 @@ extern "C" NTSTATUS DriverEntry(
 	}
 	
 	KdPrint(("[+] KsEDR Successfully loaded\n"));
-
+	if (DriverObject->DriverUnload != DriverUnload)
+		DbgRaiseAssertionFailure();
 	return status;
 }
 
-extern "C" void DriverUnload(
+void DriverUnload(
 	PDRIVER_OBJECT DriverObject
 )
 {
+	KdPrint(("[+] Unloaded KsEDR\n"));
 	//NTSTATUS status = STATUS_SUCCESS;
 	UNICODE_STRING DosDevLinkName = RTL_CONSTANT_STRING(KS_DOS_DEV_LINK_NAME);
 
-	IoDeleteSymbolicLink(&DosDevLinkName);
-	if(DriverObject && DriverObject->DeviceObject)
-		IoDeleteDevice(DriverObject->DeviceObject);
+	NTSTATUS status = IoDeleteSymbolicLink(&DosDevLinkName);
+	if (status != STATUS_INSUFFICIENT_RESOURCES)
+	{
+		if (!NT_SUCCESS(status))
+			DbgRaiseAssertionFailure();
+	}
+	
+	IoDeleteDevice(DriverObject->DeviceObject);
 
-	KdPrint(("[+] Unloaded KsEDR\n"));
 }
 
 extern "C" void DeleteExistingDeviceEntry(PUNICODE_STRING name)
