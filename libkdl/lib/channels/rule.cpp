@@ -32,13 +32,13 @@ bool Rule::setRuleParameters(const std::string& rp)
 
 }
 
-bool Rule::addRule(const std::string& name, const std::string& value, Variable::Type type)
+bool Rule::addRule(const std::string& name, const std::string& value, Variable::Type type, uint8_t flags)
 {
 	if (m_variables.find(name) != m_variables.end())
 		return false;
 	
 
-	m_variables[name] = {.searchstr = value, .type = type};
+	m_variables[name] = {.searchstr = value, .type = type, .searchMods = flags};
 
 	return true;
 }	

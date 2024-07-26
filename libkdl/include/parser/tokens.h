@@ -19,16 +19,8 @@ enum class token_t : int
 	ASSIGNMENT,
 	STAR,
 	DOT,
-	// logical operators
-	KW_OR,		// 'or'
-	KW_AND,		// 'and'
-	KW_OR_OP,	// '&&'
-	KW_AND_OP,	// '||'
-	KW_GT,
-	KW_GEQ,
-	KW_LT,
-	KW_LEQ,
-	KW_EQUALITY,
+
+
 	// section indicators
 	SI_META,
 	SI_CONTENT,
@@ -65,11 +57,23 @@ enum class token_t : int
 
 	// Conditions
 
-	CND_OF,
 	CND_THEM,
-	CND_ANY,
 	CND_ALL,
-	CND_AT,
+	CND_ANY,
+	CND_AT, 
+
+	// logical operators
+	KW_OR,		// 'or'
+	KW_AND,		// 'and'
+	KW_OR_OP,	// '&&'
+	KW_AND_OP,	// '||'
+
+	CND_OF,
+	KW_GT,
+	KW_GEQ,
+	KW_LT,
+	KW_LEQ,
+	KW_EQUALITY,
 	TEOF
 };
 

@@ -1,4 +1,6 @@
 #include "parser/RuleParser.h"
+#include "conditional/ConditionalParser.h"
+#include "conditional/ConditionalTree.h"
 
 using kdl::RuleParser;
 using kdl::CTokenMapIter;
@@ -120,6 +122,8 @@ bool RuleParser::parseSection()
 		{
 			case token_t::SI_CONTENT:
 				return parseVariables();
+			case token_t::SI_CONDITIONS:
+				return parseConditionals();
 			default:
 				abort();
 		}
@@ -161,34 +165,76 @@ bool RuleParser::parseVariables()
 
 
 		const std::string& name = m_tokenMapView[m_cursor - 2].val;
+		const std::string& value = m_tokenMapView[m_cursor].val;
 
-
-
+			
 		advance();
 
+		auto flags = scanVariableMods();
+
+		m_rule.addRule(name, value, tType, flags);
+		
+		
+		
 		printf("Found variable: %s with '%s' as value\n", 
-			m_tokenMapView[m_cursor-3].val.c_str(), 
-			m_tokenMapView[m_cursor-1].val.c_str());
+			name.c_str(), 
+			value.c_str());
 	
 	}
 
-	return false;
+	return true;
 }
 
-bool RuleParser::formatVariable(Variable::Type type, std::string& value)
+uint8_t RuleParser::scanVariableMods()
 {
-	switch (type)
+	CTokenPtr next = nullptr;
+	uint8_t flags = 0;
+	while (next = peek())
 	{
-		case Variable::BYTE_SEQUENCE:
-			return formatByteSequence(value);
-		case Variable::REGEX:
-			return false;
-		default:
-			return true;
+		if (next->t >= token_t::MOD_WIDE && next->t <= token_t::MOD_NOCASE)
+		{
+			// Match RMOD_*
+			// e.g. if next-> == token_t::MOD_ASCII,
+			//		then RMOD_ASCII == 1 << (token_t::MOD_ASCII - token_t::MOD_WIDE));
+			//			  (1 << 1)  ==		(1 << (33 - 32))
+			flags |= 1 << (((int)next->t - (int)token_t::MOD_WIDE));
+			advance();
+		}
+		else
+			break;
 	}
+	
+	return flags;
 }
 
-bool RuleParser::formatByteSequence(std::string& value)
+bool RuleParser::parseConditionals()
 {
+	printf("parsing conditionals\n");
+
+	int start = m_cursor;
+	int end = m_cursor;
+	CTokenPtr curTok;
+	while ((curTok = peek()))
+	{
+		if (nextTokenIsSection(curTok->t) || curTok->t == token_t::CLOSE_BRACE)
+		{
+			break;
+		}
+		end++;
+		advance();
+	}
+
+
+	CTokenMapView map(m_tokenMapView.data() + start, (end - start));
+	ConditionalTree ctree{};
+
+	ConditionalParser p(ctree, map);
+	if (!p.parse())
+	{
+		printf("There was an error\n");
+	}
+	ctree.dumpTree();
+
 	return false;
 }
+

@@ -9,6 +9,7 @@ KeywordMap Lexer::m_keywords =
 	{"condition", token_t::SI_CONDITIONS},
 	{"content", token_t::SI_CONTENT},
 	{"and", token_t::KW_AND},
+	{"or", token_t::KW_OR},
 	{"nocase", token_t::MOD_NOCASE},
 	{"ascii", token_t::MOD_ASCII},
 	{"wide", token_t::MOD_WIDE},
@@ -235,7 +236,7 @@ void kdl::Lexer::scanByteSearch()
 	int substringStart = m_start + 1;
 	int substringEnd = m_current ;
 
-	// Strip leading and ending whitespaces
+	// Strip leading and ending white-spaces
 	for (int i = substringStart; i < substringEnd; i++)
 	{
 		if (m_source[i] != ' ') break;
@@ -249,8 +250,14 @@ void kdl::Lexer::scanByteSearch()
 	
 	addToken(token_t::BYTE_SEQ, substringStart, substringEnd);
 	
-	if (formatByteSequence(m_tokens.back().val) != -1)
+	int possibleErrorOffset = formatByteSequence(m_tokens.back().val);
+
+	if ( possibleErrorOffset != -1)
+	{
+		m_start += possibleErrorOffset;
 		showError("Invalid hexadecimal");
+
+	}
 }
 
 void Lexer::scanSection(char target)
@@ -258,14 +265,10 @@ void Lexer::scanSection(char target)
 	while (peek() != target) advance();
 
 	while ((peek() != target) && !atEnd())
-	{
 		advance();
-	}
 	
 	if (atEnd())
-	{
 		assert(false);
-	}
 
 	advance();
 
@@ -286,7 +289,7 @@ void Lexer::showError(const char* message)
 	putchar('\n');
 	printf("\t  |\t ");
 
-	for (int i = m_lineStart; i <= m_start - 2; i++)
+	for (int i = m_lineStart; i <= m_start; i++)
 	{
 		putchar('\x20');
 	}

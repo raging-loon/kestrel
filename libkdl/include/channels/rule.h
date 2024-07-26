@@ -21,7 +21,7 @@ enum class RuleParameters : uint16_t
 /// PURPOSE
 ///		Hold information about a single rule
 ///			1. Name
-///			2. Paramters
+///			2. Parameters
 ///			3. Variables
 ///			4. Condition Tree
 ///			5. Meta info
@@ -38,7 +38,6 @@ public:
 
 	inline const std::string& getName() { return m_name; }
 
-
 	inline void setRuleParameters(RuleParameters rp) { m_params = rp; };
 
 
@@ -54,7 +53,7 @@ public:
 
 public:
 	// name and value will be copied
-	bool addRule(const std::string& name, const std::string& value, Variable::Type type);
+	bool addRule(const std::string& name, const std::string& value, Variable::Type type, uint8_t flags = 0);
 
 private:
 	

@@ -49,22 +49,23 @@ private:
 	/// 
 	bool parseVariables();
 
-
-private:
-	
 	///
 	/// PURPOSE
-	///		Format the variable's data based on it's type
-	///		Will do nothing for strings
-	///		Will transform BYTE_SEQ into an actual sequence of bytes
-	///		Will validate regex
-	/// 
-	bool formatVariable(Variable::Type type, std::string& value);
+	///		Scan for modifications after the TI_* token has been found
+	///		Will OR them together based on flags present in 'channels/type.h'
+	///
+	uint8_t scanVariableMods();
 
 
-	bool formatByteSequence(std::string& value);
-
-
+	///
+	/// PURPOSE
+	///		Parse the conditionals section
+	///		Will produce a conditional tree
+	///		
+	///		Note: parseConditional expcets the current token to be 
+	///			  The first token in the conditional sequence
+	///
+	bool parseConditionals();
 
 private:
 
@@ -75,7 +76,7 @@ private:
 	CTokenMapView& m_tokenMapView;
 
 	int m_numTokens;
-
+	
 	enum State
 	{
 		NO_SECTION,
