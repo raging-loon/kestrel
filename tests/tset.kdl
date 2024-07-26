@@ -1,0 +1,137 @@
+rule Test
+{
+meta:
+	author = "Tess Personne"
+
+strings:
+	test = "LowLevelKeyBoardProc"
+
+condition:
+	$test
+
+}
+
+rule EternalBlueTest : Net
+{
+meta:
+	port: 22 if open
+
+content:
+	$c = | 05 00 07 03 (00 * 12) |
+
+condition:
+	$c
+
+}
+
+// Translates to 
+
+bool rule_callback_EternalBlueTest(data, ipheader, tcpheader)
+{
+	return bytesearch(
+			data, 
+			'\x05\x00\x07\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', 
+			16
+		);
+}
+
+
+rule CVE-2017-0145-Test : Net
+{
+meta:
+	comment: "stolen from exploit db"
+	protocol: SMB
+
+content:
+	!ipcrgx = /\\\\<ipregex>\\IPC$\
+	$setup = | 23 00 00 00 |
+	$trans = "\\PIPE\\\0x00"
+
+condition:
+	all 
+
+}
+
+// translate to
+
+bool rule_callback_cve_2017_0145_test(data, ipheader, tcpheader, smbdata)
+{
+	return regex_search(data, "/\\\\<ipregex>\\IPC$\") &&
+		   byte_search(data, "\x23\x00\x00\x00") &&
+		   byte_search(data, "\\PIPE\\\0x00");
+
+
+}
+
+rule GenericKeylogger : Program
+{
+meta:
+	platform: windows
+	pool: pe #portable executable
+
+content:
+	$s1 = "KeyboardProc"
+	$s2 = "SetWindowsHookEx"
+	$s3 = "LowLevelKeyBoardHook"
+	$s4 = "GetWindowText"
+	!s5 = /Reg(.{4,})/
+
+condition:
+	3 of ($s* in pd.symbols)
+}
+
+bool rule_callback_generic_keylogger(ProgramData * pd)
+{
+	string targets[] = {
+		"KeyBoardProc", ...
+	};
+
+	int detected = 0;
+	for(int i = 0; i < 4; i++)
+	{
+		if(function_search(pd.symbols, targets[i]))
+			detected++;
+	}
+
+	if(regex_search(pd.symbols, targets[4]))
+		detected++;
+
+	return detected >= 3;
+}
+
+rule GenericPacker : Program
+{
+meta:
+	pool : pe
+
+condition:
+	(pe.virtualSize - pe.diskSize) <= 200 
+	or
+	(size(pe.imports) <= 20 )
+	or
+	(size(pe.links) <= 2)
+}
+
+bool rule_callback_generic_packer(ProgramData* pd)
+{
+	return (pd->virtualSize - pd->diskSize) <= 200 ||
+		   (pd->numImports <= 20); 
+}
+
+rule DetectDeplhi
+{
+meta:
+	pool: pe
+
+condition:
+	pe.compileDate == 7/19/1992
+}
+
+policy NewPolicy
+{
+meta:
+	platform: windows
+
+rules:
+	any program modifies startup
+}
