@@ -33,14 +33,11 @@ ConditionalParser::ConditionalParser(ConditionalTree& ctree, CTokenMapView& ctmv
 bool kdl::ConditionalParser::parse()
 {
 	CTokenPtr start = advance();
-
-
 	if (m_cursor == 0 || isAtEnd())
 	{
 		if (isJunctionOperator(start->t))
 			return false;
 	}
-
 
 	if (isAtEnd())
 		return true;
@@ -65,7 +62,7 @@ bool kdl::ConditionalParser::parse()
 
 	else if (isJunctionOperator(next->t))
 	{
-		printf("Found split: %s\n", kdl::getTokenName(next->t));
+		printf("Junction Found: %s\n", kdl::getTokenName(next->t));
 		if (!m_ctree.addJunction(next, pLevel))
 			return false;
 		advance();
@@ -83,12 +80,12 @@ bool kdl::ConditionalParser::parse()
 
 		return parse();
 	}
-
 	else if (start->t == token_t::OPEN_PARENTHESIS)
 	{
 		pLevel++;
 		return parse();
 	}
+	
 	return true;
 }
 

@@ -37,11 +37,27 @@ struct CNode
 /// 
 ///		This works by continually adding subconditions (e.g. filesize > 10MB)
 ///		And combining them with junctions ( 'and' or 'or' )
+/// 
 ///		
+///		Each Condition Tree has a parenthesis level (plevel) that it is responsible for.
+///		Whenever a subcondition or junction is added, the we will it's plevel to the one passed.
+///		
+///		If they do not match, the we will create a sub-condition tree
+///		and forward any future requests to that plevel to it. It will do the same.
+/// 
+///		This sub tree is created via the private constructor. An existing std::vector<CNode*> is passed
+///		to save memory and prevent unnecessary copying.
+/// 
+///		When merge is called, all sub-trees beneath us will also be merged. Then our sub-tree
+///		will merge with us.
+/// 
+///		Merging consists of moving the sub-tree's head to our head's right leaf
+/// 
+
 class ConditionalTree 
 {
 public:
-	ConditionalTree(int pLevel = 0) : m_head(nullptr), m_p_level(pLevel) {}
+	ConditionalTree(int pLevel = 0);
 	~ConditionalTree();
 
 	///
@@ -68,11 +84,20 @@ public:
 	/// 
 	bool addJunction(CTokenPtr cmpOP, int pLevel);
 
+	/// 
+	/// PURPOSE
+	///		Merge any trees below pLevel with the tree at pLevel
+	///		After merging, the tree at pLevel will set it's head's 
+	///		right leaf to it's sub-tree's head.
+	///		It will also copy the contents of it's node list.	
+	/// 
 	bool merge(int pLevel);
 
 	void dumpTree();
 
 private:
+	/// Private constructor to pass plevel 0's nodes to
+	ConditionalTree(std::vector<CNode*>* sharedNodes, int pLevel);
 
 	bool forwardSubCondition(CTokenPtr op, CTokenPtr left, CTokenPtr right, int pLevel);
 	bool forwardJunction(CTokenPtr cmpOP, int pLevel);
@@ -84,7 +109,7 @@ private:
 	CNode* m_head;
 
 	/// List of pointers to the nodes so they can be destroyed 
-	std::vector<CNode*> m_nodes;
+	std::vector<CNode*>* m_nodes;
 
 	/// Our parenthesis level
 	int m_p_level;

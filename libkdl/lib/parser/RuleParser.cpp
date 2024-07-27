@@ -213,7 +213,9 @@ bool RuleParser::parseConditionals()
 
 	int start = m_cursor;
 	int end = m_cursor;
+	
 	CTokenPtr curTok;
+
 	while ((curTok = peek()))
 	{
 		if (nextTokenIsSection(curTok->t) || curTok->t == token_t::CLOSE_BRACE)

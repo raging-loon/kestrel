@@ -5,13 +5,30 @@ using kdl::CTokenPtr;
 using kdl::ConditionalTree;
 using kdl::token_t;
 
+
+ConditionalTree::ConditionalTree(int pLevel)
+	: m_head{nullptr}, m_p_level(pLevel)
+{
+	if (pLevel == 0)
+		m_nodes = new std::vector<CNode*>;
+}
+
+ConditionalTree::ConditionalTree(std::vector<CNode*>* sharedNodes, int pLevel)
+	: m_head{ nullptr }, m_p_level { pLevel }
+{
+	printf("New subtree made. %d owned by %d\n",pLevel, pLevel-1);
+	m_nodes = sharedNodes;
+
+}
 ConditionalTree::~ConditionalTree()
 {
 	if (m_p_level == 0)
 	{
-		for (int i = 0; i < m_nodes.size(); i++)
-			delete m_nodes[i];
+		for (int i = 0; i < m_nodes->size(); i++)
+			delete m_nodes->at(i);
 
+		m_nodes->clear();
+		delete m_nodes;
 	}
 
 	if (m_subTree)
@@ -33,9 +50,9 @@ bool ConditionalTree::addSubCondition(CTokenPtr op, CTokenPtr left, CTokenPtr ri
 
 	nnode->right = new CNode(right);
 
-	m_nodes.push_back(nnode);
-	m_nodes.push_back(nnode->left);
-	m_nodes.push_back(nnode->right);
+	m_nodes->push_back(nnode);
+	m_nodes->push_back(nnode->left);
+	m_nodes->push_back(nnode->right);
 
 	if (pLevel != m_p_level)
 		return forwardSubCondition(op, left, right, pLevel);
@@ -56,7 +73,7 @@ bool ConditionalTree::addJunction(CTokenPtr cmpOP, int pLevel)
 	if (!cmpOP || !m_head) return false;
 
 	auto* nnode = new CNode(cmpOP);
-	m_nodes.push_back(nnode);
+	m_nodes->push_back(nnode);
 
 	if (pLevel == m_p_level)
 	{
@@ -79,22 +96,30 @@ bool ConditionalTree::addJunction(CTokenPtr cmpOP, int pLevel)
 bool ConditionalTree::merge(int pLevel)
 {
 	if (!m_subTree) return true;
-
-	if (pLevel > m_p_level)
-	{
+	
+	if(pLevel != m_p_level)
 		m_subTree->merge(pLevel);
-		
+
+	if (pLevel >= m_p_level)
+	{
+
+		printf("[%d] Merging sub tree (%d).\n", m_p_level, pLevel);
+	
+		// If our head is null, our conditional
+		// might start with parenthesis, thus we would
+		// not have added any subconditions.
+		if (!m_head)
+			m_head = m_subTree->m_head;
+		else
+			m_head->right = m_subTree->m_head;
+
+		delete m_subTree;
+		m_subTree = nullptr;
 	}
 
-	printf("[%d] Merging sub tree (%d).\n", m_p_level, pLevel);
-	m_head->right = m_subTree->m_head;
 
-	// Check efficneity here.
-	for (int i = 0; i < m_subTree->m_nodes.size(); i++)
-		m_nodes.push_back(m_subTree->m_nodes[i]);
 
-	delete m_subTree;
-	m_subTree = nullptr;
+
 
 	return true;
 }
@@ -106,23 +131,22 @@ void ConditionalTree::dumpTree()
 
 }
 
+
 bool ConditionalTree::forwardSubCondition(CTokenPtr op, CTokenPtr left, CTokenPtr right, int pLevel)
 {
 	if (!m_subTree)
-		m_subTree = new ConditionalTree(m_p_level + 1);
+		m_subTree = new ConditionalTree(m_nodes, m_p_level + 1);
 
-	assert(m_subTree->addSubCondition(op, left, right, pLevel));
-	return true;
+	return m_subTree->addSubCondition(op, left, right, pLevel);
 
 }
 
 bool ConditionalTree::forwardJunction(CTokenPtr cmpOP, int pLevel)
 {
 	if (!m_subTree)
-		m_subTree = new ConditionalTree(m_p_level + 1);
+		m_subTree = new ConditionalTree(m_nodes, m_p_level + 1);
 
-	assert(m_subTree->addJunction(cmpOP, pLevel));
-	return true;
+	return m_subTree->addJunction(cmpOP, pLevel);
 }
 
 void ConditionalTree::_int_dumpTree(const CNode* head)
