@@ -1,0 +1,15 @@
+out
+*.json
+CMakeFiles
+_deps
+*.vcx*
+CMakeCache.txt
+*.CMakeCache
+*.cmake
+*.sln
+
+Debug
+lib
+ldu_unit_test.dir
+x64
+
