@@ -1,0 +1,62 @@
+;
+; TestEDRDriver.inf
+;
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = System ; TODO: specify appropriate Class
+ClassGuid   = {4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider    = %ManufacturerName%
+CatalogFile = TestEDRDriver.cat
+DriverVer   = ; TODO: set DriverVer in stampinf property pages
+PnpLockdown = 1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+TestEDRDriver.sys = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName% = Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+
+[Standard.NT$ARCH$.10.0...16299]
+%TestEDRDriver.DeviceDesc% = TestEDRDriver_Device, Root\TestEDRDriver ; TODO: edit hw-id
+
+[TestEDRDriver_Device.NT]
+CopyFiles = File_Copy
+
+[File_Copy]
+TestEDRDriver.sys
+
+;-------------- Service installation
+[TestEDRDriver_Device.NT.Services]
+AddService = TestEDRDriver,%SPSVCINST_ASSOCSERVICE%, TestEDRDriver_Service_Inst
+
+; -------------- TestEDRDriver driver install sections
+[TestEDRDriver_Service_Inst]
+DisplayName    = %TestEDRDriver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\TestEDRDriver.sys
+
+[TestEDRDriver_Device.NT.Wdf]
+KmdfService = TestEDRDriver, TestEDRDriver_wdfsect
+
+[TestEDRDriver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "TestEDRDriver Installation Disk"
+TestEDRDriver.DeviceDesc = "TestEDRDriver Device"
+TestEDRDriver.SVCDESC = "TestEDRDriver Service"

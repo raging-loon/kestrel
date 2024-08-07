@@ -13,3 +13,5 @@ test/unit/lib
 test/unit/ldu_unit_test.dir
 test/unit/x64
 build
+
+*dir
